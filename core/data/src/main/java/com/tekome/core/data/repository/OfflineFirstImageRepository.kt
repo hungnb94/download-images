@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.flow
 internal class OfflineFirstImageRepository(
     private val apiService: ImageApiService,
 ) : ImageRepository {
-    override suspend fun getImages(): Flow<List<Image>> =
+    override fun getImages(): Flow<List<Image>> =
         flow {
             val entities = apiService.getImages().map { it.asEntity() }
             emit(entities.map { it.asExternalModel() })

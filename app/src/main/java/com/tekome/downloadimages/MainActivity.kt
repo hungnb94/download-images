@@ -5,46 +5,34 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.tekome.downloadimages.ui.theme.DownloadimagesflowTheme
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import com.tekome.downloadimages.ui.theme.DownloadImagesTheme
+import com.tekome.feature.images.navigation.IMAGES_ROUTE
+import com.tekome.feature.images.navigation.imagesScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            DownloadimagesflowTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding),
-                    )
+            DownloadImagesTheme {
+                val navController = rememberNavController()
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    NavHost(
+                        navController = navController,
+                        startDestination = IMAGES_ROUTE,
+                    ) {
+                        imagesScreen()
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(
-    name: String,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier,
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    DownloadimagesflowTheme {
-        Greeting("Android")
     }
 }

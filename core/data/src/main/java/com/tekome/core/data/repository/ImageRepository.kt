@@ -4,5 +4,5 @@ import com.tekome.core.model.Image
 import kotlinx.coroutines.flow.Flow
 
 interface ImageRepository {
-    suspend fun getImages(): Flow<List<Image>>
+    fun getImages(): Flow<List<Image>>
 }
