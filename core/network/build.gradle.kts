@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.hilt)
@@ -29,8 +31,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
+        }
+    }
+    buildFeatures {
+        buildConfig = true
     }
 }
 
@@ -38,10 +45,16 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+
+    implementation(libs.okhttp.logging)
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.kotlin.serialization)
+
     implementation(libs.coil.kt)
     implementation(libs.coil.kt.svg)
+    implementation(libs.kotlinx.serialization.json)
+
+    implementation(libs.androidx.tracing.ktx)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
