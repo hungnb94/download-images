@@ -1,4 +1,4 @@
-package com.tekome.download_images_flow.ui.theme
+package com.tekome.downloadimages.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

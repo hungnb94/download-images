@@ -1,6 +1,5 @@
-package com.tekome.download_images_flow.ui.theme
+package com.tekome.downloadimages.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

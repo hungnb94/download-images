@@ -1,4 +1,4 @@
-package com.tekome.download_images_flow
+package com.tekome.downloadimages
 
 import org.junit.Test
 

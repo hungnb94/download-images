@@ -1,4 +1,4 @@
-package com.tekome.download_images_flow
+package com.tekome.downloadimages
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

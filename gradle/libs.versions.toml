@@ -1,14 +1,17 @@
 [versions]
 agp = "8.13.0"
+activityCompose = "1.11.0"
+appcompat = "1.7.1"
+coil = "2.7.0"
+composeBom = "2025.09.01"
 coreKtx = "1.17.0"
-kotlin = "2.2.20"
+espressoCore = "3.7.0"
+hilt = "2.57.2"
 junit = "4.13.2"
 junitVersion = "1.1.5"
-espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.9.4"
-activityCompose = "1.11.0"
-composeBom = "2025.09.01"
-appcompat = "1.7.1"
+kotlin = "2.2.20"
+ksp = "2.2.20-2.0.3"
 material = "1.10.0"
 retrofit = "2.11.0"
 
@@ -27,6 +30,11 @@ androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+coil-kt = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
+coil-kt-svg = { group = "io.coil-kt", name = "coil-svg", version.ref = "coil" }
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+hilt-core = { group = "com.google.dagger", name = "hilt-core", version.ref = "hilt" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
@@ -35,6 +43,8 @@ retrofit-kotlin-serialization = { group = "com.squareup.retrofit2", name = "conv
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
