@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -91,10 +92,12 @@ fun ImagesScreen(
                 enter = slideInVertically(initialOffsetY = { it }),
                 exit = slideOutVertically(targetOffsetY = { it }),
             ) {
-                DownloadBottomBar(
-                    selectedCount = selectedImageIds.size,
-                    onDownloadClick = onDownload,
-                )
+                BottomAppBar {
+                    DownloadBottomBar(
+                        selectedCount = selectedImageIds.size,
+                        onDownloadClick = onDownload,
+                    )
+                }
             }
         },
         modifier = Modifier.fillMaxSize(),
