@@ -1,6 +1,5 @@
 package com.tekome.feature.images
 
-import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -27,16 +26,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.tekome.core.model.Image
 
 @Composable
 fun ImagesRoute(viewModel: ImagesViewModel = hiltViewModel()) {
     val uiState by viewModel.imagesUiState.collectAsStateWithLifecycle()
-    Log.d("", "UiState: $uiState")
     ImagesScreen(
         uiState = uiState,
     )
@@ -87,11 +88,16 @@ private fun SelectAllTopBar(
     val allSelected = selectedCount > 0 && selectedCount == totalCount
 
     TopAppBar(
-        title = { Text(text = if (selectedCount > 0) "Đã chọn $selectedCount" else "Chọn ảnh") },
+        title = { Text(text = if (selectedCount > 0) "Đã chọn $selectedCount" else stringResource(R.string.select)) },
         actions = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = if (allSelected) "Bỏ chọn tất cả" else "Chọn tất cả",
+                    text =
+                        if (allSelected) {
+                            stringResource(R.string.unselect_all)
+                        } else {
+                            stringResource(R.string.select_all)
+                        },
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 Checkbox(
@@ -143,10 +149,9 @@ private fun ImageItemView(
         modifier =
             Modifier
                 .padding(4.dp)
-                .aspectRatio(1f) // Đảm bảo ảnh là hình vuông
+                .aspectRatio(1f)
                 .clip(MaterialTheme.shapes.medium)
                 .clickable(onClick = onClick)
-                // Thêm viền nếu ảnh được chọn
                 .then(
                     if (isSelected) {
                         Modifier.border(
@@ -160,24 +165,14 @@ private fun ImageItemView(
                 ),
         contentAlignment = Alignment.Center,
     ) {
-        // Sử dụng Coil để tải ảnh
-//        AsyncImage(
-//            model =
-//                ImageRequest
-//                    .Builder(LocalContext.current)
-//                    .data(image.url)
-//                    .crossfade(true)
-//                    .build(),
-//            contentDescription = "Image ${image.id}",
-//            contentScale = ContentScale.Crop, // Cắt ảnh để vừa với Box
-//            modifier = Modifier.fillMaxSize(),
-//            // Ảnh placeholder khi đang tải hoặc lỗi
-//            placeholder = painterResource(id = R.drawable.ic_launcher_background), // Thay bằng drawable của bạn
-//            error = painterResource(id = R.drawable.ic_launcher_background), // Thay bằng drawable của bạn
-//        )
+        AsyncImage(
+            model = image.url,
+            contentDescription = "Image ${image.id}",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+        )
         Text(text = image.id, style = MaterialTheme.typography.bodyLarge)
 
-        // Hiển thị icon check nếu được chọn
         if (isSelected) {
             Icon(
                 painter = painterResource(id = android.R.drawable.checkbox_on_background),

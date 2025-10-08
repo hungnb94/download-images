@@ -57,6 +57,9 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.hilt.navigation.compose)
 
+    implementation(libs.coil.kt)
+    implementation(libs.coil.kt.compose)
+
     implementation(libs.timber)
 
     implementation(libs.hilt.android)

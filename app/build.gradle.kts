@@ -60,6 +60,8 @@ dependencies {
 
     implementation(libs.timber)
 
+    implementation(libs.coil.kt)
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
