@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -21,6 +22,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -38,19 +40,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import coil.compose.AsyncImage
 import com.tekome.core.model.Image
 import timber.log.Timber
 
 @Composable
-fun ImagesRoute(viewModel: ImagesViewModel = hiltViewModel()) {
+fun ImagesRoute(
+    viewModel: ImagesViewModel =
+        hiltViewModel(LocalViewModelStoreOwner.current!!, null),
+) {
     val uiState by viewModel.imagesUiState.collectAsStateWithLifecycle()
     val selectedImageIds by viewModel.selectedImageIds.collectAsStateWithLifecycle()
     Timber.d("Selected images: $selectedImageIds")
@@ -204,7 +208,7 @@ private fun ImageItemView(
                 .then(
                     if (isSelected) {
                         Modifier.border(
-                            3.dp,
+                            4.dp,
                             MaterialTheme.colorScheme.primary,
                             MaterialTheme.shapes.medium,
                         )
@@ -224,14 +228,19 @@ private fun ImageItemView(
 
         if (isSelected) {
             Icon(
-                painter = painterResource(id = android.R.drawable.checkbox_on_background),
+                imageVector = Icons.Outlined.Done,
                 contentDescription = "Selected",
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.onPrimary,
                 modifier =
                     Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                        .size(24.dp),
+                        .align(Alignment.BottomEnd)
+                        .offset(x = (-8).dp, y = (-8).dp)
+                        .border(
+                            2.dp,
+                            MaterialTheme.colorScheme.onPrimary,
+                            MaterialTheme.shapes.extraSmall,
+                        ).padding(4.dp)
+                        .size(20.dp),
             )
         }
     }
