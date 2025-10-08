@@ -34,21 +34,31 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.tekome.core.model.Image
+import timber.log.Timber
 
 @Composable
 fun ImagesRoute(viewModel: ImagesViewModel = hiltViewModel()) {
     val uiState by viewModel.imagesUiState.collectAsStateWithLifecycle()
+    val selectedImageIds by viewModel.selectedImageIds.collectAsStateWithLifecycle()
+    Timber.d("Selected images: $selectedImageIds")
+
     ImagesScreen(
         uiState = uiState,
+        selectedImageIds = selectedImageIds,
+        onImageClick = viewModel::onImageClick,
     )
 }
 
 @Composable
-fun ImagesScreen(uiState: ImagesUiState) {
+fun ImagesScreen(
+    uiState: ImagesUiState,
+    selectedImageIds: Set<String>,
+    onImageClick: (String) -> Unit = {},
+) {
     Scaffold(
         topBar = {
             SelectAllTopBar(
-                selectedCount = 0,
+                selectedCount = selectedImageIds.size,
                 totalCount = if (uiState is ImagesUiState.Success) uiState.images.size else 0,
                 onEvent = {},
             )
@@ -65,10 +75,8 @@ fun ImagesScreen(uiState: ImagesUiState) {
                 ImageGrid(
                     modifier = Modifier.padding(paddingValues),
                     images = uiState.images,
-                    selectedImageIds = setOf(),
-                    onImageClick = { imageId ->
-//                        viewModel.handleEvent(ImagePickerEvent.ImageClicked(imageId))
-                    },
+                    selectedImageIds = selectedImageIds,
+                    onImageClick = onImageClick,
                 )
             }
 
@@ -88,7 +96,16 @@ private fun SelectAllTopBar(
     val allSelected = selectedCount > 0 && selectedCount == totalCount
 
     TopAppBar(
-        title = { Text(text = if (selectedCount > 0) "Đã chọn $selectedCount" else stringResource(R.string.select)) },
+        title = {
+            Text(
+                text =
+                    if (selectedCount > 0) {
+                        stringResource(R.string.selected_count, selectedCount)
+                    } else {
+                        stringResource(R.string.select)
+                    },
+            )
+        },
         actions = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
