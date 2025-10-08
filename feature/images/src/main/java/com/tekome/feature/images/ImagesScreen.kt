@@ -1,23 +1,35 @@
 package com.tekome.feature.images
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -46,6 +58,14 @@ fun ImagesRoute(viewModel: ImagesViewModel = hiltViewModel()) {
         uiState = uiState,
         selectedImageIds = selectedImageIds,
         onImageClick = viewModel::onImageClick,
+        onSelectAll = { all ->
+            if (all) {
+                viewModel.onSelectAll()
+            } else {
+                viewModel.onDeselectAll()
+            }
+        },
+        onDownload = viewModel::downloadSelectedImages,
     )
 }
 
@@ -54,15 +74,30 @@ fun ImagesScreen(
     uiState: ImagesUiState,
     selectedImageIds: Set<String>,
     onImageClick: (String) -> Unit = {},
+    onSelectAll: (Boolean) -> Unit = {},
+    onDownload: () -> Unit = {},
 ) {
     Scaffold(
         topBar = {
             SelectAllTopBar(
                 selectedCount = selectedImageIds.size,
                 totalCount = if (uiState is ImagesUiState.Success) uiState.images.size else 0,
-                onEvent = {},
+                onSelectAll = onSelectAll,
             )
         },
+        bottomBar = {
+            AnimatedVisibility(
+                visible = selectedImageIds.isNotEmpty(),
+                enter = slideInVertically(initialOffsetY = { it }),
+                exit = slideOutVertically(targetOffsetY = { it }),
+            ) {
+                DownloadBottomBar(
+                    selectedCount = selectedImageIds.size,
+                    onDownloadClick = onDownload,
+                )
+            }
+        },
+        modifier = Modifier.fillMaxSize(),
     ) { paddingValues ->
         when (uiState) {
             is ImagesUiState.Loading -> {
@@ -91,7 +126,7 @@ fun ImagesScreen(
 private fun SelectAllTopBar(
     selectedCount: Int,
     totalCount: Int,
-    onEvent: (Image) -> Unit,
+    onSelectAll: (Boolean) -> Unit,
 ) {
     val allSelected = selectedCount > 0 && selectedCount == totalCount
 
@@ -119,15 +154,7 @@ private fun SelectAllTopBar(
                 )
                 Checkbox(
                     checked = allSelected,
-                    onCheckedChange = { isChecked ->
-//                        val event =
-//                            if (isChecked) {
-//                                ImagePickerEvent.SelectAllClicked
-//                            } else {
-//                                ImagePickerEvent.DeselectAllClicked
-//                            }
-//                        onEvent(event)
-                    },
+                    onCheckedChange = onSelectAll,
                 )
             }
         },
@@ -141,17 +168,19 @@ private fun ImageGrid(
     selectedImageIds: Set<String>,
     onImageClick: (String) -> Unit,
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 100.dp),
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(4.dp),
-    ) {
-        items(images, key = { it.id }) { image ->
-            ImageItemView(
-                image = image,
-                isSelected = selectedImageIds.contains(image.id),
-                onClick = { onImageClick(image.id) },
-            )
+    Column {
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 100.dp),
+            modifier = modifier.fillMaxSize(),
+            contentPadding = PaddingValues(4.dp),
+        ) {
+            items(images, key = { it.id }) { image ->
+                ImageItemView(
+                    image = image,
+                    isSelected = selectedImageIds.contains(image.id),
+                    onClick = { onImageClick(image.id) },
+                )
+            }
         }
     }
 }
@@ -201,6 +230,36 @@ private fun ImageItemView(
                         .padding(8.dp)
                         .size(24.dp),
             )
+        }
+    }
+}
+
+@Composable
+private fun DownloadBottomBar(
+    selectedCount: Int,
+    onDownloadClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier,
+        shadowElevation = 8.dp,
+    ) {
+        Button(
+            onClick = onDownloadClick,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .height(50.dp),
+            shape = MaterialTheme.shapes.large,
+        ) {
+            Icon(
+                imageVector = Icons.Default.Download,
+                contentDescription = "Download Icon",
+                modifier = Modifier.size(ButtonDefaults.IconSize),
+            )
+            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+            Text(text = stringResource(R.string.download_count, selectedCount))
         }
     }
 }

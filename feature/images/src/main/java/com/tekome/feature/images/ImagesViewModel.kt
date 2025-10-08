@@ -22,6 +22,11 @@ class ImagesViewModel
     constructor(
         imageRepository: ImageRepository,
     ) : ViewModel() {
+        private val _selectedImageIds: MutableStateFlow<Set<String>> = MutableStateFlow(setOf())
+        val selectedImageIds: StateFlow<Set<String>> = _selectedImageIds.asStateFlow()
+        private val _images: MutableStateFlow<List<Image>> = MutableStateFlow(listOf())
+        private val images: StateFlow<List<Image>> = _images.asStateFlow()
+
         val imagesUiState: StateFlow<ImagesUiState> =
             imageRepository
                 .getImages()
@@ -37,9 +42,6 @@ class ImagesViewModel
                     initialValue = ImagesUiState.Loading,
                 )
 
-        private val _selectedImageIds: MutableStateFlow<Set<String>> = MutableStateFlow(setOf())
-        val selectedImageIds: StateFlow<Set<String>> = _selectedImageIds.asStateFlow()
-
         fun onImageClick(imageId: String) {
             val currentSelected = _selectedImageIds.value.toMutableSet()
             if (currentSelected.contains(imageId)) {
@@ -48,6 +50,33 @@ class ImagesViewModel
                 currentSelected.add(imageId)
             }
             _selectedImageIds.value = currentSelected
+        }
+
+        fun onSelectAll() {
+            _selectedImageIds.value =
+                (imagesUiState.value as ImagesUiState.Success).images.map { it.id }.toSet()
+        }
+
+        fun onDeselectAll() {
+            _selectedImageIds.value = setOf()
+        }
+
+        fun downloadSelectedImages() {
+            val selectedIds = _selectedImageIds.value
+            if (selectedIds.isEmpty()) {
+                Timber.w("Download clicked but no images are selected.")
+                return
+            }
+
+            Timber.d("Starting download for ${selectedIds.size} images")
+            val images = (imagesUiState.value as ImagesUiState.Success).images
+            selectedIds.forEach { id ->
+                val imageUrl =
+                    images
+                        .find { it.id == id }
+                        ?.url
+                Timber.d(" -> Downloading image ID: $id from URL: $imageUrl")
+            }
         }
     }
 
