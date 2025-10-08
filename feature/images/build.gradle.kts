@@ -61,6 +61,8 @@ dependencies {
     implementation(libs.coil.kt)
     implementation(libs.coil.kt.compose)
 
+    implementation(libs.androidx.work.runtime.ktx)
+
     implementation(libs.timber)
 
     implementation(libs.hilt.android)

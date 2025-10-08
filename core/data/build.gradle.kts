@@ -50,6 +50,8 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
 
+    implementation(libs.androidx.work.runtime.ktx)
+
     implementation(libs.timber)
 
     testImplementation(libs.junit)

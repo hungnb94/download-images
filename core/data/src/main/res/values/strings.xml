@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="start_downloading">Start downloading…</string>
+    <string name="downloading">Downloading: %1$s</string>
+    <string name="download_channel">Download Channel</string>
+    <string name="download_channel_desc">Channel for file download notifications</string>
+</resources>
