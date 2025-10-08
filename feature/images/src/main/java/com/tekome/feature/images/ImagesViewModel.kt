@@ -1,5 +1,6 @@
 package com.tekome.feature.images
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tekome.core.data.repository.ImageRepository
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,8 +25,12 @@ class ImagesViewModel
             imageRepository
                 .getImages()
                 .map<List<Image>, ImagesUiState> { images -> ImagesUiState.Success(images) }
-                .onStart { emit(ImagesUiState.Loading) }
+                .onStart {
+                    Timber.d("start load ui state")
+                    emit(ImagesUiState.Loading)
+                }
                 .catch { throwable ->
+                    Log.e("", "get image failed", throwable)
                     emit(ImagesUiState.Error(throwable.message ?: "Unknown error"))
                 }.stateIn(
                     scope = viewModelScope,

@@ -11,7 +11,6 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
 private const val BASE_URL = "https://68e223708943bf6bb3c5be40.mockapi.io"
 
 @Singleton
@@ -21,6 +20,7 @@ class RetrofitImageNetwork
         networkJson: Json,
         okhttpCallFactory: dagger.Lazy<Call.Factory>,
     ) : ImageNetworkDatasource {
+
         private val networkApiService =
             Retrofit
                 .Builder()

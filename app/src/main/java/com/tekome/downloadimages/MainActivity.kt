@@ -13,7 +13,9 @@ import androidx.navigation.compose.rememberNavController
 import com.tekome.downloadimages.ui.theme.DownloadImagesTheme
 import com.tekome.feature.images.navigation.IMAGES_ROUTE
 import com.tekome.feature.images.navigation.imagesScreen
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -1,5 +1,6 @@
 package com.tekome.feature.images
 
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -35,6 +36,7 @@ import com.tekome.core.model.Image
 @Composable
 fun ImagesRoute(viewModel: ImagesViewModel = hiltViewModel()) {
     val uiState by viewModel.imagesUiState.collectAsStateWithLifecycle()
+    Log.d("", "UiState: $uiState")
     ImagesScreen(
         uiState = uiState,
     )
