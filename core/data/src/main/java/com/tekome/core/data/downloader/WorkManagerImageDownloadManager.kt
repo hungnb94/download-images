@@ -14,12 +14,12 @@ import kotlinx.coroutines.flow.map
 import java.util.UUID
 import javax.inject.Inject
 
-internal class WorkManagerImageDownloadManager
+class WorkManagerImageDownloadManager
     @Inject
     constructor(
-        @ApplicationContext context: Context,
+        @ApplicationContext private val context: Context,
     ) : ImageDownloadManager {
-        private val workManager = context.getSystemService(WorkManager::class.java)
+        private val workManager = WorkManager.getInstance(context)
 
         override fun downloadImage(
             url: String,
@@ -52,8 +52,8 @@ internal class WorkManagerImageDownloadManager
             return workRequest.id
         }
 
-        override fun getDownloadedImages(): Flow<List<DownloadTask>> =
-            workManager
+        override fun getDownloadedImages(): Flow<List<DownloadTask>> {
+            return workManager
                 .getWorkInfosByTagFlow(DOWNLOAD_WORK_NAME)
                 .map { workInfos ->
                     workInfos.map { workInfo ->
@@ -74,4 +74,5 @@ internal class WorkManagerImageDownloadManager
                         )
                     }
                 }
+        }
     }

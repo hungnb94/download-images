@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import timber.log.Timber
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -24,14 +23,20 @@ class ImagesViewModel
     @Inject
     constructor(
         imageRepository: dagger.Lazy<ImageRepository>,
-        private val imageDownloadManager: dagger.Lazy<ImageDownloadManager>,
+        private val downloadManager: dagger.Lazy<ImageDownloadManager>,
     ) : ViewModel() {
         private val _selectedImageIds: MutableStateFlow<Set<String>> = MutableStateFlow(setOf())
         val selectedImageIds: StateFlow<Set<String>> = _selectedImageIds.asStateFlow()
-        private val _images: MutableStateFlow<List<Image>> = MutableStateFlow(listOf())
-        private val images: StateFlow<List<Image>> = _images.asStateFlow()
 
-        private val _downloadTasks = MutableStateFlow<Map<UUID, DownloadTask>>(emptyMap())
+        val downloadTasks: StateFlow<List<DownloadTask>> =
+            downloadManager
+                .get()
+                .getDownloadedImages()
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5_000),
+                    initialValue = listOf(),
+                )
 
         val imagesUiState: StateFlow<ImagesUiState> =
             imageRepository
@@ -78,37 +83,17 @@ class ImagesViewModel
             Timber.d("Starting download for ${selectedIds.size} images")
             val images = (imagesUiState.value as ImagesUiState.Success).images
             selectedIds.forEach { id ->
-                val imageUrl =
+                val image =
                     images
                         .find { it.id == id }
-                        ?.url
-                if (imageUrl != null) {
-                    val fileName = imageUrl.substringAfterLast("/")
-//                    val workId =
-//                        imageDownloader.downloadImage(
-//                            url = imageUrl,
-//                            fileName = fileName,
-//                        )
-//                    observeWorkProgress(workId, fileName)
+                if (image != null) {
+                    val fileName = image.id + "_" + image.url.substringAfterLast("/")
+                    downloadManager.get().downloadImage(
+                        url = image.url,
+                        fileName = fileName,
+                    )
                 }
             }
-        }
-
-        private fun observeWorkProgress(
-            workId: UUID,
-            fileName: String,
-        ) {
-//            workManager.getWorkInfoByIdFlow(workId).map { workInfo ->
-//                if (workInfo != null) {
-//                    val progress = workInfo.progress.getInt(DownloadWorker.KEY_PROGRESS, 0)
-//
-//                    val currentTasks = _downloadTasks.value.toMutableMap()
-//                    val isFinished = workInfo.state.isFinished
-//
-//                    currentTasks[workId] = DownloadTask(workId, fileName, progress, isFinished)
-//                    _downloadTasks.value = currentTasks
-//                }
-//            }
         }
     }
 

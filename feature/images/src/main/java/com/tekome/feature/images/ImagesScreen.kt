@@ -50,6 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.tekome.core.model.DownloadTask
 import com.tekome.core.model.Image
 import timber.log.Timber
 
@@ -60,6 +61,7 @@ fun ImagesRoute(
 ) {
     val uiState by viewModel.imagesUiState.collectAsStateWithLifecycle()
     val selectedImageIds by viewModel.selectedImageIds.collectAsStateWithLifecycle()
+    val downloadTasks by viewModel.downloadTasks.collectAsStateWithLifecycle()
     Timber.d("Selected images: $selectedImageIds")
 
     ImagesScreen(
@@ -84,6 +86,7 @@ fun ImagesScreen(
     onImageClick: (String) -> Unit = {},
     onSelectAll: (Boolean) -> Unit = {},
     onDownload: () -> Unit = {},
+    downloadTasks: List<DownloadTask> = listOf(),
 ) {
     Scaffold(
         topBar = {
@@ -91,6 +94,8 @@ fun ImagesScreen(
                 selectedCount = selectedImageIds.size,
                 totalCount = if (uiState is ImagesUiState.Success) uiState.images.size else 0,
                 onSelectAll = onSelectAll,
+                downloaded = downloadTasks.count { it.isFinished && it.progress == 100 },
+                totalDownload = downloadTasks.size,
             )
         },
         bottomBar = {
