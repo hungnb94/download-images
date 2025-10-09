@@ -14,11 +14,11 @@ import kotlinx.coroutines.flow.map
 import java.util.UUID
 import javax.inject.Inject
 
-class WorkManagerImageDownloader
+internal class WorkManagerImageDownloadManager
     @Inject
     constructor(
         @ApplicationContext context: Context,
-    ) : ImageDownloader {
+    ) : ImageDownloadManager {
         private val workManager = context.getSystemService(WorkManager::class.java)
 
         override fun downloadImage(

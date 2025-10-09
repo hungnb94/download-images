@@ -4,7 +4,7 @@ import com.tekome.core.model.DownloadTask
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 
-interface ImageDownloader {
+interface ImageDownloadManager {
     fun downloadImage(
         url: String,
         fileName: String,
