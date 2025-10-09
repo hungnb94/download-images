@@ -17,17 +17,17 @@ private const val BASE_URL = "https://68e223708943bf6bb3c5be40.mockapi.io"
 class RetrofitImageNetwork
     @Inject
     constructor(
-        networkJson: Json,
+        networkJson: dagger.Lazy<Json>,
         okhttpCallFactory: dagger.Lazy<Call.Factory>,
     ) : ImageNetworkDatasource {
-
         private val networkApiService =
             Retrofit
                 .Builder()
                 .baseUrl(BASE_URL)
                 .callFactory { okhttpCallFactory.get().newCall(it) }
-                .addConverterFactory(networkJson.asConverterFactory("application/json".toMediaType()))
-                .build()
+                .addConverterFactory(
+                    networkJson.get().asConverterFactory("application/json".toMediaType()),
+                ).build()
                 .create(ImageApiService::class.java)
 
         override suspend fun getImages(): List<ImageResponse> = networkApiService.getImages()

@@ -6,10 +6,8 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import java.util.UUID
-import javax.inject.Inject
 
 class WorkManagerImageDownloader
-    @Inject
     constructor(
         private val workManager: WorkManager,
     ) : ImageDownloader {

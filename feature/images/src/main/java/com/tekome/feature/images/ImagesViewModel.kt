@@ -22,7 +22,7 @@ import javax.inject.Inject
 class ImagesViewModel
     @Inject
     constructor(
-        imageRepository: ImageRepository,
+        imageRepository: dagger.Lazy<ImageRepository>,
 //        private val imageDownloader: ImageDownloader,
 //        private val workManager: WorkManager,
     ) : ViewModel() {
@@ -35,6 +35,7 @@ class ImagesViewModel
 
         val imagesUiState: StateFlow<ImagesUiState> =
             imageRepository
+                .get()
                 .getImages()
                 .map<List<Image>, ImagesUiState> { images -> ImagesUiState.Success(images) }
                 .onStart {

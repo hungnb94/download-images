@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -47,7 +48,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import coil.compose.AsyncImage
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.tekome.core.model.Image
 import timber.log.Timber
 
@@ -132,9 +134,11 @@ fun ImagesScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SelectAllTopBar(
-    selectedCount: Int,
-    totalCount: Int,
-    onSelectAll: (Boolean) -> Unit,
+    selectedCount: Int = 0,
+    totalCount: Int = 0,
+    downloaded: Int = 0,
+    totalDownload: Int = 0,
+    onSelectAll: (Boolean) -> Unit = {},
 ) {
     val allSelected = selectedCount > 0 && selectedCount == totalCount
 
@@ -151,6 +155,13 @@ private fun SelectAllTopBar(
         },
         actions = {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                if (totalDownload > 0) {
+                    Text(
+                        text = "Download $downloaded/$totalDownload",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
                 Text(
                     text =
                         if (allSelected) {
@@ -193,6 +204,7 @@ private fun ImageGrid(
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun ImageItemView(
     image: Image,
@@ -219,7 +231,7 @@ private fun ImageItemView(
                 ),
         contentAlignment = Alignment.Center,
     ) {
-        AsyncImage(
+        GlideImage(
             model = image.url,
             contentDescription = "Image ${image.id}",
             contentScale = ContentScale.Crop,
