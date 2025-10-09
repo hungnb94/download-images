@@ -4,7 +4,8 @@ import java.util.UUID
 
 data class DownloadTask(
     val id: UUID,
-    val fileName: String,
+    val inputUrl: String,
+    val outputUri: String,
     val progress: Int = 0,
     val isFinished: Boolean = false,
 )

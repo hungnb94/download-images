@@ -2,6 +2,7 @@ package com.tekome.feature.images
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tekome.core.data.downloader.ImageDownloader
 import com.tekome.core.data.repository.ImageRepository
 import com.tekome.core.model.DownloadTask
 import com.tekome.core.model.Image
@@ -23,8 +24,7 @@ class ImagesViewModel
     @Inject
     constructor(
         imageRepository: dagger.Lazy<ImageRepository>,
-//        private val imageDownloader: ImageDownloader,
-//        private val workManager: WorkManager,
+        private val imageDownloader: dagger.Lazy<ImageDownloader>,
     ) : ViewModel() {
         private val _selectedImageIds: MutableStateFlow<Set<String>> = MutableStateFlow(setOf())
         val selectedImageIds: StateFlow<Set<String>> = _selectedImageIds.asStateFlow()

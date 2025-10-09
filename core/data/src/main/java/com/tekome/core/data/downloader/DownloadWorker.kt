@@ -62,7 +62,11 @@ class DownloadWorker(
                     }
                 }
 
-                val outputData = workDataOf(KEY_OUTPUT_URI to outputFile.toURI().toString())
+                val outputData =
+                    workDataOf(
+                        KEY_INPUT_URL to imageUrl,
+                        KEY_OUTPUT_URI to outputFile.toURI().toString(),
+                    )
                 Result.success(outputData)
             } catch (e: Exception) {
                 Timber.e(e, "Download file $imageUrl failed")
