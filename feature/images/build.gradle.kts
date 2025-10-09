@@ -60,6 +60,7 @@ dependencies {
 
     implementation(libs.coil.kt)
     implementation(libs.coil.kt.compose)
+    implementation(libs.glide.compose)
 
     implementation(libs.androidx.work.runtime.ktx)
 
