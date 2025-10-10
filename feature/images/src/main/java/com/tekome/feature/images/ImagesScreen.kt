@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -50,9 +49,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.tekome.core.model.DownloadTask
 import com.tekome.core.model.Image
-import timber.log.Timber
 
 @Composable
 fun ImagesRoute(
@@ -61,8 +58,6 @@ fun ImagesRoute(
 ) {
     val uiState by viewModel.imagesUiState.collectAsStateWithLifecycle()
     val selectedImageIds by viewModel.selectedImageIds.collectAsStateWithLifecycle()
-    val downloadTasks by viewModel.downloadTasks.collectAsStateWithLifecycle()
-    Timber.d("Selected images: $selectedImageIds")
 
     ImagesScreen(
         uiState = uiState,
@@ -86,7 +81,6 @@ fun ImagesScreen(
     onImageClick: (String) -> Unit = {},
     onSelectAll: (Boolean) -> Unit = {},
     onDownload: () -> Unit = {},
-    downloadTasks: List<DownloadTask> = listOf(),
 ) {
     Scaffold(
         topBar = {
@@ -94,8 +88,6 @@ fun ImagesScreen(
                 selectedCount = selectedImageIds.size,
                 totalCount = if (uiState is ImagesUiState.Success) uiState.images.size else 0,
                 onSelectAll = onSelectAll,
-                downloaded = downloadTasks.count { it.isFinished && it.progress == 100 },
-                totalDownload = downloadTasks.size,
             )
         },
         bottomBar = {
@@ -141,8 +133,6 @@ fun ImagesScreen(
 private fun SelectAllTopBar(
     selectedCount: Int = 0,
     totalCount: Int = 0,
-    downloaded: Int = 0,
-    totalDownload: Int = 0,
     onSelectAll: (Boolean) -> Unit = {},
 ) {
     val allSelected = selectedCount > 0 && selectedCount == totalCount
@@ -160,13 +150,6 @@ private fun SelectAllTopBar(
         },
         actions = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (totalDownload > 0) {
-                    Text(
-                        text = "Download $downloaded/$totalDownload",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    Spacer(Modifier.width(8.dp))
-                }
                 Text(
                     text =
                         if (allSelected) {

@@ -52,18 +52,16 @@ class WorkManagerImageDownloadManager
             return workRequest.id
         }
 
-        override fun getDownloadedImages(): Flow<List<DownloadTask>> {
-            return workManager
-                .getWorkInfosByTagFlow(DOWNLOAD_WORK_NAME)
+        override fun getDownloadedImages(): Flow<List<DownloadTask>> =
+            workManager
+                .getWorkInfosByTagFlow(DOWNLOAD_WORK_TAG)
                 .map { workInfos ->
                     workInfos.map { workInfo ->
-                        val inputUrl =
-                            workInfo.outputData.getString(DownloadWorker.KEY_INPUT_URL)
-                                ?: "Unknown File"
-                        val outputUri =
-                            workInfo.outputData.getString(DownloadWorker.KEY_OUTPUT_URI) ?: ""
-                        val progress = workInfo.progress.getInt(DownloadWorker.KEY_PROGRESS, 0)
                         val isFinished = workInfo.state.isFinished
+                        val data = if (isFinished) workInfo.outputData else workInfo.progress
+                        val inputUrl = data.getString(DownloadWorker.KEY_INPUT_URL) ?: ""
+                        val outputUri = data.getString(DownloadWorker.KEY_OUTPUT_URI) ?: ""
+                        val progress = data.getInt(DownloadWorker.KEY_PROGRESS, 0)
 
                         DownloadTask(
                             id = workInfo.id,
@@ -74,5 +72,4 @@ class WorkManagerImageDownloadManager
                         )
                     }
                 }
-        }
     }

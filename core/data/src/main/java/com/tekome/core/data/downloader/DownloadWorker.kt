@@ -25,6 +25,7 @@ class DownloadWorker(
         const val KEY_INPUT_FILENAME = "KEY_INPUT_FILENAME"
         const val KEY_OUTPUT_URI = "KEY_OUTPUT_URI"
         const val KEY_PROGRESS = "KEY_PROGRESS"
+        const val PROGRESS_SUCCESSFUL = 100
         const val NOTIFICATION_ID = 1001
         const val CHANNEL_ID = "Download"
     }
@@ -33,17 +34,25 @@ class DownloadWorker(
         val imageUrl = inputData.getString(KEY_INPUT_URL) ?: return Result.failure()
         val fileName = inputData.getString(KEY_INPUT_FILENAME) ?: return Result.failure()
 
-        createNotificationChannel()
-        val notification =
-            createNotification(
-                fileName,
-                applicationContext.getString(R.string.start_downloading),
-            )
-        setForeground(androidx.work.ForegroundInfo(NOTIFICATION_ID, notification))
+//        createNotificationChannel()
+//        val notification =
+//            createNotification(
+//                fileName,
+//                applicationContext.getString(R.string.start_downloading),
+//            )
+//        setForeground(androidx.work.ForegroundInfo(NOTIFICATION_ID, notification))
+        val outputFile = File(applicationContext.filesDir, fileName)
+        setProgress(
+            workDataOf(
+                KEY_INPUT_URL to imageUrl,
+                KEY_OUTPUT_URI to outputFile.toURI().toString(),
+                KEY_PROGRESS to 0,
+            ),
+        )
+        var progress = 0
 
         return withContext(Dispatchers.IO) {
             try {
-                val outputFile = File(applicationContext.filesDir, fileName)
                 val connection = URL(imageUrl).openConnection()
                 val contentLength = connection.contentLength
                 var totalBytesCopied: Long = 0
@@ -55,23 +64,36 @@ class DownloadWorker(
                         while (input.read(buffer).also { bytesRead = it } != -1) {
                             output.write(buffer, 0, bytesRead)
                             totalBytesCopied += bytesRead
-                            val progress = (totalBytesCopied * 100 / contentLength).toInt()
-                            setProgress(workDataOf(KEY_PROGRESS to progress))
-                            updateNotification(fileName, "$progress%")
+                            progress = (totalBytesCopied * 100 / contentLength).toInt()
+                            setProgress(
+                                workDataOf(
+                                    KEY_INPUT_URL to imageUrl,
+                                    KEY_OUTPUT_URI to outputFile.toURI().toString(),
+                                    KEY_PROGRESS to progress,
+                                ),
+                            )
+//                            updateNotification(fileName, "$progress%")
                         }
                     }
                 }
 
-                val outputData =
+                Result.success(
                     workDataOf(
                         KEY_INPUT_URL to imageUrl,
                         KEY_OUTPUT_URI to outputFile.toURI().toString(),
-                    )
-                Result.success(outputData)
+                        KEY_PROGRESS to PROGRESS_SUCCESSFUL,
+                    ),
+                )
             } catch (e: Exception) {
                 Timber.e(e, "Download file $imageUrl failed")
-                File(applicationContext.filesDir, fileName).delete()
-                Result.failure()
+                outputFile.delete()
+                Result.failure(
+                    workDataOf(
+                        KEY_INPUT_URL to imageUrl,
+                        KEY_OUTPUT_URI to outputFile.toURI().toString(),
+                        KEY_PROGRESS to progress,
+                    ),
+                )
             }
         }
     }
