@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tekome.core.data.downloader.ImageDownloadManager
 import com.tekome.core.data.repository.ImageRepository
-import com.tekome.core.model.DownloadTask
 import com.tekome.core.model.Image
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,16 +26,6 @@ class ImagesViewModel
     ) : ViewModel() {
         private val _selectedImageIds: MutableStateFlow<Set<String>> = MutableStateFlow(setOf())
         val selectedImageIds: StateFlow<Set<String>> = _selectedImageIds.asStateFlow()
-
-        val downloadTasks: StateFlow<List<DownloadTask>> =
-            downloadManager
-                .get()
-                .getDownloadedImages()
-                .stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(5_000),
-                    initialValue = listOf(),
-                )
 
         val imagesUiState: StateFlow<ImagesUiState> =
             imageRepository

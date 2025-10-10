@@ -12,7 +12,10 @@ import androidx.compose.ui.platform.testTag
 @Composable
 fun LoadingIndicator() {
     Column(
-        modifier = Modifier.fillMaxSize().testTag("loader"),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .testTag("loader"),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="no_downloads">There are no downloads yet.</string>
+    <string name="downloads">Downloads</string>
+    <string name="downloads_count">Downloads %s</string>
+</resources>
