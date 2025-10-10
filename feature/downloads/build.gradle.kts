@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.tekome.feature.images"
+    namespace = "com.tekome.feature.downloads"
     compileSdk = 36
 
     defaultConfig {
@@ -58,12 +58,6 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.hilt.navigation.compose)
-
-    implementation(libs.coil.kt)
-    implementation(libs.coil.kt.compose)
-    implementation(libs.glide.compose)
-
-    implementation(libs.androidx.work.runtime.ktx)
 
     implementation(libs.timber)
 
