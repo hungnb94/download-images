@@ -83,6 +83,7 @@ class ImagesViewModel
                     )
                 }
             }
+            _selectedImageIds.value = setOf()
         }
     }
 
