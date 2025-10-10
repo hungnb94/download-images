@@ -53,6 +53,7 @@ dependencies {
     api(libs.androidx.compose.material3)
     api(libs.androidx.compose.material.icons.extended)
     api(libs.androidx.hilt.navigation.compose)
+    api(libs.glide.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
