@@ -10,15 +10,15 @@ import com.tekome.core.model.Image
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import timber.log.Timber
@@ -37,17 +37,20 @@ class ImagesViewModel
         }
 
         private val _selectedImageIds: MutableStateFlow<Set<String>> = MutableStateFlow(setOf())
-        val selectedImageIds: StateFlow<Set<String>> = _selectedImageIds.asStateFlow()
 
-        @OptIn(ExperimentalCoroutinesApi::class)
-        val imagesUiState: StateFlow<ImagesUiState> =
+        private val _images: Flow<List<Image>> =
             flow {
                 Timber.i("Thread: ${Thread.currentThread().name}")
                 emit(imageRepositoryProvider.get())
             }.flowOn(ioDispatcher)
                 .flatMapLatest { repository -> repository.getImages() }
-                .map<List<Image>, ImagesUiState> { images -> ImagesUiState.Success(images) }
-                .onStart {
+
+        @OptIn(ExperimentalCoroutinesApi::class)
+        val uiState: StateFlow<ImagesUiState> =
+            _images
+                .combine(_selectedImageIds) { images, selectedIds ->
+                    ImagesUiState.Success(images = images, selectedImageIds = selectedIds)
+                }.onStart<ImagesUiState> {
                     emit(ImagesUiState.Loading)
                 }.catch { throwable ->
                     Timber.e(throwable, "Get images failed")
@@ -70,7 +73,7 @@ class ImagesViewModel
 
         fun onSelectAll() {
             _selectedImageIds.value =
-                (imagesUiState.value as ImagesUiState.Success).images.map { it.id }.toSet()
+                (uiState.value as ImagesUiState.Success).images.map { it.id }.toSet()
         }
 
         fun onDeselectAll() {
@@ -85,7 +88,7 @@ class ImagesViewModel
             }
 
             Timber.d("Starting download for ${selectedIds.size} images")
-            val images = (imagesUiState.value as ImagesUiState.Success).images
+            val images = (uiState.value as ImagesUiState.Success).images
             selectedIds.forEach { id ->
                 val image =
                     images
@@ -107,6 +110,7 @@ sealed interface ImagesUiState {
 
     data class Success(
         val images: List<Image>,
+        val selectedImageIds: Set<String>,
     ) : ImagesUiState
 
     data class Error(

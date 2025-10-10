@@ -49,6 +49,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.tekome.core.designsystem.components.ErrorState
 import com.tekome.core.model.Image
 
 @Composable
@@ -56,12 +57,10 @@ fun ImagesRoute(
     viewModel: ImagesViewModel =
         hiltViewModel(LocalViewModelStoreOwner.current!!, null),
 ) {
-    val uiState by viewModel.imagesUiState.collectAsStateWithLifecycle()
-    val selectedImageIds by viewModel.selectedImageIds.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     ImagesScreen(
         uiState = uiState,
-        selectedImageIds = selectedImageIds,
         onImageClick = viewModel::onImageClick,
         onSelectAll = { all ->
             if (all) {
@@ -77,18 +76,22 @@ fun ImagesRoute(
 @Composable
 fun ImagesScreen(
     uiState: ImagesUiState,
-    selectedImageIds: Set<String>,
     onImageClick: (String) -> Unit = {},
     onSelectAll: (Boolean) -> Unit = {},
     onDownload: () -> Unit = {},
 ) {
+    val selectedImageIds =
+        if (uiState is ImagesUiState.Success) uiState.selectedImageIds else setOf()
+
     Scaffold(
         topBar = {
-            SelectAllTopBar(
-                selectedCount = selectedImageIds.size,
-                totalCount = if (uiState is ImagesUiState.Success) uiState.images.size else 0,
-                onSelectAll = onSelectAll,
-            )
+            if (uiState is ImagesUiState.Success) {
+                SelectAllTopBar(
+                    selectedCount = uiState.selectedImageIds.size,
+                    totalCount = uiState.images.size,
+                    onSelectAll = onSelectAll,
+                )
+            }
         },
         bottomBar = {
             AnimatedVisibility(
@@ -123,6 +126,7 @@ fun ImagesScreen(
             }
 
             is ImagesUiState.Error -> {
+                ErrorState(uiState.message)
             }
         }
     }
