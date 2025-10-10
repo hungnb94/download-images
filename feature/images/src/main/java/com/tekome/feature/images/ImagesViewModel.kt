@@ -2,15 +2,22 @@ package com.tekome.feature.images
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tekome.core.common.Dispatcher
+import com.tekome.core.common.NiaDispatchers
 import com.tekome.core.data.downloader.ImageDownloadManager
 import com.tekome.core.data.repository.ImageRepository
 import com.tekome.core.model.Image
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
@@ -21,16 +28,24 @@ import javax.inject.Inject
 class ImagesViewModel
     @Inject
     constructor(
-        imageRepository: dagger.Lazy<ImageRepository>,
-        private val downloadManager: dagger.Lazy<ImageDownloadManager>,
+        imageRepositoryProvider: dagger.Lazy<ImageRepository>,
+        private val downloadManagerProvider: dagger.Lazy<ImageDownloadManager>,
+        @Dispatcher(NiaDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
+        init {
+            Timber.i("Init ImagesViewModel")
+        }
+
         private val _selectedImageIds: MutableStateFlow<Set<String>> = MutableStateFlow(setOf())
         val selectedImageIds: StateFlow<Set<String>> = _selectedImageIds.asStateFlow()
 
+        @OptIn(ExperimentalCoroutinesApi::class)
         val imagesUiState: StateFlow<ImagesUiState> =
-            imageRepository
-                .get()
-                .getImages()
+            flow {
+                Timber.i("Thread: ${Thread.currentThread().name}")
+                emit(imageRepositoryProvider.get())
+            }.flowOn(ioDispatcher)
+                .flatMapLatest { repository -> repository.getImages() }
                 .map<List<Image>, ImagesUiState> { images -> ImagesUiState.Success(images) }
                 .onStart {
                     emit(ImagesUiState.Loading)
@@ -77,7 +92,7 @@ class ImagesViewModel
                         .find { it.id == id }
                 if (image != null) {
                     val fileName = image.id + "_" + image.url.substringAfterLast("/")
-                    downloadManager.get().downloadImage(
+                    downloadManagerProvider.get().downloadImage(
                         url = image.url,
                         fileName = fileName,
                     )

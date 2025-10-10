@@ -8,6 +8,7 @@ import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,6 +21,10 @@ class RetrofitImageNetwork
         networkJson: dagger.Lazy<Json>,
         okhttpCallFactory: dagger.Lazy<Call.Factory>,
     ) : ImageNetworkDatasource {
+        init {
+            Timber.i("Init ImageNetworkDatasource")
+        }
+
         private val networkApiService =
             Retrofit
                 .Builder()

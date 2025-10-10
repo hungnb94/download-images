@@ -24,10 +24,11 @@ rootProject.name = "download-images-flow"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 include(":app")
-include(":core:data")
 include(":core:model")
+include(":core:common")
 include(":core:database")
 include(":core:network")
+include(":core:data")
 include(":feature:images")
 include(":feature:downloads")
 include(":core:designsystem")

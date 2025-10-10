@@ -6,6 +6,7 @@ import com.tekome.core.model.Image
 import com.tekome.core.network.ImageNetworkDatasource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import timber.log.Timber
 import javax.inject.Inject
 
 internal class OfflineFirstImageRepository
@@ -13,6 +14,10 @@ internal class OfflineFirstImageRepository
     constructor(
         private val network: dagger.Lazy<ImageNetworkDatasource>,
     ) : ImageRepository {
+        init {
+            Timber.i("Init ImageRepository")
+        }
+
         override fun getImages(): Flow<List<Image>> =
             flow {
                 val response = network.get().getImages()
