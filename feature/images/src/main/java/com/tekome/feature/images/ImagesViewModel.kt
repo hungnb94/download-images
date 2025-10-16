@@ -11,7 +11,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -21,6 +23,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -38,6 +41,7 @@ class ImagesViewModel
 
         private val _selectedImageIds: MutableStateFlow<Set<String>> = MutableStateFlow(setOf())
 
+        @OptIn(ExperimentalCoroutinesApi::class)
         private val _images: Flow<List<Image>> =
             flow {
                 Timber.i("Thread: ${Thread.currentThread().name}")
@@ -45,23 +49,55 @@ class ImagesViewModel
             }.flowOn(ioDispatcher)
                 .flatMapLatest { repository -> repository.getImages() }
 
+        private val _isSelectionModeActive = MutableStateFlow(false)
+
+        private val _navigateToDetailsEvent = MutableSharedFlow<String>()
+        val navigateToDetailsEvent: SharedFlow<String>
+            get() = _navigateToDetailsEvent
+
         @OptIn(ExperimentalCoroutinesApi::class)
         val uiState: StateFlow<ImagesUiState> =
-            _images
-                .combine(_selectedImageIds) { images, selectedIds ->
-                    ImagesUiState.Success(images = images, selectedImageIds = selectedIds)
-                }.onStart<ImagesUiState> {
-                    emit(ImagesUiState.Loading)
-                }.catch { throwable ->
-                    Timber.e(throwable, "Get images failed")
-                    emit(ImagesUiState.Error(throwable.message ?: "Unknown error"))
-                }.stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(5_000),
-                    initialValue = ImagesUiState.Loading,
+            combine(
+                _images,
+                _selectedImageIds,
+                _isSelectionModeActive,
+            ) { images, selectedIds, isSelectionModeActive ->
+                ImagesUiState.Success(
+                    images = images,
+                    selectedImageIds = selectedIds,
+                    isSelectionModeActive = isSelectionModeActive,
                 )
+            }.onStart<ImagesUiState> {
+                emit(ImagesUiState.Loading)
+            }.catch { throwable ->
+                Timber.e(throwable, "Get images failed")
+                emit(ImagesUiState.Error(throwable.message ?: "Unknown error"))
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = ImagesUiState.Loading,
+            )
+
+        fun enterSelectionMode() {
+            _isSelectionModeActive.value = true
+        }
+
+        fun exitSelectionMode() {
+            _isSelectionModeActive.value = false
+            _selectedImageIds.value = setOf()
+        }
 
         fun onImageClick(imageId: String) {
+            if (_isSelectionModeActive.value) {
+                toggleImageSelection(imageId)
+            } else {
+                viewModelScope.launch {
+                    _navigateToDetailsEvent.emit(imageId)
+                }
+            }
+        }
+
+        private fun toggleImageSelection(imageId: String) {
             val currentSelected = _selectedImageIds.value.toMutableSet()
             if (currentSelected.contains(imageId)) {
                 currentSelected.remove(imageId)
@@ -111,6 +147,7 @@ sealed interface ImagesUiState {
     data class Success(
         val images: List<Image>,
         val selectedImageIds: Set<String>,
+        val isSelectionModeActive: Boolean = false,
     ) : ImagesUiState
 
     data class Error(

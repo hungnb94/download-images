@@ -34,8 +34,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,13 +56,22 @@ import com.tekome.core.model.Image
 
 @Composable
 fun ImagesRoute(
+    onNavigateToDetail: (String) -> Unit,
     viewModel: ImagesViewModel =
         hiltViewModel(LocalViewModelStoreOwner.current!!, null),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    LaunchedEffect(Unit) {
+        viewModel.navigateToDetailsEvent.collect { imageId ->
+            onNavigateToDetail(imageId)
+        }
+    }
+
     ImagesScreen(
         uiState = uiState,
+        onEnterSelectionMode = viewModel::enterSelectionMode,
+        onExitSelectionMode = viewModel::exitSelectionMode,
         onImageClick = viewModel::onImageClick,
         onSelectAll = { all ->
             if (all) {
@@ -76,21 +87,27 @@ fun ImagesRoute(
 @Composable
 fun ImagesScreen(
     uiState: ImagesUiState,
+    onEnterSelectionMode: () -> Unit = {},
+    onExitSelectionMode: () -> Unit = {},
     onImageClick: (String) -> Unit = {},
     onSelectAll: (Boolean) -> Unit = {},
     onDownload: () -> Unit = {},
 ) {
     val selectedImageIds =
         if (uiState is ImagesUiState.Success) uiState.selectedImageIds else setOf()
+    val isSelectionModeActive = uiState is ImagesUiState.Success && uiState.isSelectionModeActive
 
     Scaffold(
         topBar = {
-            if (uiState is ImagesUiState.Success) {
+            if (uiState is ImagesUiState.Success && isSelectionModeActive) {
                 SelectAllTopBar(
                     selectedCount = uiState.selectedImageIds.size,
                     totalCount = uiState.images.size,
                     onSelectAll = onSelectAll,
+                    onExitSelectionMode = onExitSelectionMode,
                 )
+            } else {
+                ImageTopAppBar(onEnterSelectionMode = onEnterSelectionMode)
             }
         },
         bottomBar = {
@@ -138,6 +155,7 @@ private fun SelectAllTopBar(
     selectedCount: Int = 0,
     totalCount: Int = 0,
     onSelectAll: (Boolean) -> Unit = {},
+    onExitSelectionMode: () -> Unit = {}
 ) {
     val allSelected = selectedCount > 0 && selectedCount == totalCount
 
@@ -154,6 +172,10 @@ private fun SelectAllTopBar(
         },
         actions = {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                TextButton(onClick = onExitSelectionMode) {
+                    Text(stringResource(android.R.string.cancel))
+                }
+
                 Text(
                     text =
                         if (allSelected) {
@@ -167,6 +189,19 @@ private fun SelectAllTopBar(
                     checked = allSelected,
                     onCheckedChange = onSelectAll,
                 )
+            }
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ImageTopAppBar(onEnterSelectionMode: () -> Unit) {
+    TopAppBar(
+        title = { Text(stringResource(R.string.library)) },
+        actions = {
+            TextButton(onClick = onEnterSelectionMode) {
+                Text(stringResource(R.string.select))
             }
         },
     )

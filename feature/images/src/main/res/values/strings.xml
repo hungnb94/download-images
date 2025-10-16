@@ -6,4 +6,5 @@
     <string name="selected_count">Selected %1$d</string>
     <string name="download">Download</string>
     <string name="download_count">Download (%1$d)</string>
+    <string name="library">Library</string>
 </resources>

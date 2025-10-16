@@ -10,8 +10,8 @@ const val IMAGES_ROUTE = "images"
 
 fun NavController.navigateToImages(navOptions: NavOptions) = navigate(route = IMAGES_ROUTE, navOptions = navOptions)
 
-fun NavGraphBuilder.imagesScreen() {
+fun NavGraphBuilder.imagesScreen(onNavigateToDetail: (String) -> Unit = {}) {
     composable(IMAGES_ROUTE) {
-        ImagesRoute()
+        ImagesRoute(onNavigateToDetail = onNavigateToDetail)
     }
 }
